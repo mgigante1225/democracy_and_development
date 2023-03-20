@@ -1,0 +1,75 @@
+---
+title: "Backup"
+author: "Mike"
+date: "2022/4/4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+my.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(my.dir) 
+library(haven)
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+library(hrbrthemes)
+penn_world <- read_dta("data/pwt1001.dta")
+polity <- read.csv("data/p5v2018.csv")
+```
+
+## Backup
+```{r, include=FALSE, results='asis'}
+#creating a subset of the datasets to build the main dataset
+df_penn_world <- penn_world%>% dplyr::select(country, countrycode, year, rgdpna)
+df_polity <- polity%>%dplyr::select(country, scode, year, polity, polity2, p5, democ, autoc)
+df_merged <- merge(df_penn_world, df_polity, by=c("country", "year"))
+#not sure about this -- see the polity handbook for what -11, -66, and -88 mean
+df_merged <- df_merged %>% filter(polity>-11)
+
+#testing to show two graphs side by side
+#graph 1 for polity2 score by rgdpna
+df_merged %>%filter(country=="Chile")%>% ggplot(., aes(x=rgdpna, y=polity2)) + ylim(-10,10) +
+  geom_line(color="#69b3a2", size=2) +
+  ggtitle("Table 1: Polity2 Score by Real Nominal GDP for Chile") +
+  theme_ipsum() -> p1
+#prints the graph
+p1
+
+#no longer used
+#graph 2 for income
+#df_merged %>%filter(country=="Chile")%>% ggplot(., aes(x=rgdpna, y=rgdpe)) +
+#  geom_line(color="grey",size=2) +
+#  ggtitle("Income By Year") +
+#  theme_ipsum() -> p2
+#the two graphs side by side
+#p1+p2
+
+#testing to see if the main datasets and the merged datasets are similar -- not necessary. 
+#df %>%filter(country=="Japan")%>%
+#ggplot(., aes(x = year, y = rgdpe)) + 
+#geom_point() + xlab('Date Delineated in Years') + ylab('RGDPE Rate') + stat_smooth(method = "loess", col = "red") + theme(text=element_text(size=12,  family="serif")) + ggtitle("Figure 2: Test of Merged")
+
+#df_polity%>%filter(country=="Japan")%>%
+#ggplot(., aes(x = year, y = polity)) + 
+#geom_point() + xlab('Date Delineated in Years') + ylab('Polity2') + stat_smooth(method = "loess", col = "red") + theme(text=element_text(size=12,  family="serif")) + ggtitle("Figure 3: Test of Polity")
+
+#df_merged%>%filter(country=="Japan")%>%
+#ggplot(., aes(x = year, y = polity)) + 
+#geom_point() + xlab('Date Delineated in Years') + ylab('Polity2') + stat_smooth(method = "loess", col = "red") + theme(text=element_text(size=12,  family="serif")) + ggtitle("Figure 4: Test of Merged")
+```
+
+```{r, include=FALSE, results='asis'}
+#code for graphs with two y axes --> the gdp value is at the 100thousandth level to allow for easy comparison between polity score and gdp
+#setting the graph 
+coef <- 100000
+
+#code for China
+df_merged %>% filter(country=="China")%>%
+  ggplot(., aes(x = year)) + geom_line(aes(y=polity2), col="blue", size=2) + geom_line(aes(y=rgdpna/coef), col = "red", size=2) + scale_y_continuous("Polity Score", sec.axis = sec_axis(~., name="GDP")) + ggtitle("Graph comparing polity score and gdp value China") + theme(axis.title.y = element_text(color = "blue", size=13), axis.title.y.right = element_text(color = "red", size=13))
+
+#code for Chile
+df_merged %>% filter(country=="Chile")%>%
+  ggplot(., aes(x = year)) + geom_line(aes(y=polity2), col="blue", size=2) + geom_line(aes(y=rgdpna/coef), col = "red", size=2) + scale_y_continuous("Polity Score", sec.axis = sec_axis(~., name="GDP")) + ggtitle("Graph comparing polity score and gdp value Chile")+ theme(axis.title.y = element_text(color = "blue", size=13), axis.title.y.right = element_text(color = "red", size=13))
+```
+
