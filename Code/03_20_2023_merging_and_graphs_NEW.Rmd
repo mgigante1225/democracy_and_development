@@ -28,6 +28,16 @@ polity <- read.csv("data/p5v2018.csv")
 
 ## Backup
 ```{r, include=FALSE, results='asis'}
+
+# Before doing anything, make sure you have a directory for the folder location that contains
+# the p5v2018.csv file
+
+# Step 1: Assign folder location containing p5v2018.csv file
+dataloc <- r"(C:\Users\micha\OneDrive - George Mason University - O365 Production\democracy_and_development\data\data_raw)"
+
+# Step 2: Assign folder location where outputs will be stored
+outputloc <- dataloc <- r"(C:\Users\micha\OneDrive - George Mason University - O365 Production\democracy_and_development\data\data_clean)"
+
 #creating a subset of the datasets to build the main dataset
 df_penn_world <- pwt10.01%>% dplyr::select(country, isocode, year, rgdpna, rgdpe, rgdpo, pop)
 df_polity <- polity%>%dplyr::select(country, year, polity, polity2, p5, democ, autoc)
